@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -8,15 +8,12 @@ const ROOT = join(__dirname, '..');
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const USED_TITLES_FILE = join(ROOT, 'output', 'used-titles.json');
 
 const ALL_TYPES = [
   '질문형', '후기형', '공감형', '꿀팁형',
   '비교형', '참여형', '일상형', '답례품/선물형', '시즌/계절형',
 ];
-
-function pickRandom(arr, n) {
-  return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
-}
 
 function load(file) {
   return readFileSync(join(ROOT, 'knowledge', file), 'utf-8');
@@ -28,15 +25,38 @@ function getWeekLabel() {
   return `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${week}주차`;
 }
 
+function loadUsedTitles() {
+  if (!existsSync(USED_TITLES_FILE)) return [];
+  try {
+    return JSON.parse(readFileSync(USED_TITLES_FILE, 'utf-8'));
+  } catch {
+    return [];
+  }
+}
+
+function saveUsedTitles(existing, newTitles) {
+  mkdirSync(join(ROOT, 'output'), { recursive: true });
+  const updated = [...existing, ...newTitles].slice(-200); // 최근 200개만 유지
+  writeFileSync(USED_TITLES_FILE, JSON.stringify(updated, null, 2), 'utf-8');
+}
+
 export async function generatePosts() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY가 .env에 없습니다.');
 
-  const brand     = load('brand.md');
-  const types     = load('post-types.md');
-  const examples  = load('examples.md');
-  const weekLabel = getWeekLabel();
-  const typeBlocks = ALL_TYPES.map(t => `    {\n      "type": "${t}",\n      "title": "제목",\n      "content": "글 내용 (줄바꿈은 \\\\n 사용)",\n      "comment": "댓글 1줄"\n    }`).join(',\n');
+  const brand      = load('brand.md');
+  const types      = load('post-types.md');
+  const examples   = load('examples.md');
+  const weekLabel  = getWeekLabel();
+  const usedTitles = loadUsedTitles();
+
+  const usedSection = usedTitles.length > 0
+    ? `\n## 이미 사용한 제목 (절대 비슷하게도 쓰지 말 것)\n${usedTitles.map(t => `- ${t}`).join('\n')}\n`
+    : '';
+
+  const typeBlocks = ALL_TYPES.map(t =>
+    `    {\n      "type": "${t}",\n      "title": "제목",\n      "content": "글 내용 (줄바꿈은 \\\\n 사용)",\n      "comment": "댓글 1줄"\n    }`
+  ).join(',\n');
 
   const prompt = `당신은 테리크 브랜드의 맘카페 마케팅 원고 전문가입니다.
 실제 맘카페 회원처럼 자연스러운 글을 씁니다.
@@ -49,7 +69,7 @@ ${types}
 
 ## 잘 된 원고 예시 (이 스타일과 말투를 반드시 참고)
 ${examples}
-
+${usedSection}
 ## 이번 주
 ${weekLabel}
 
@@ -86,7 +106,13 @@ ${typeBlocks}
   const json = await res.json();
   const raw = json.candidates[0].content.parts[0].text.trim();
   const jsonStr = raw.startsWith('{') ? raw : raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1);
-  return JSON.parse(jsonStr);
+  const result = JSON.parse(jsonStr);
+
+  const newTitles = result.posts.map(p => p.title);
+  saveUsedTitles(usedTitles, newTitles);
+  console.log(`사용된 제목 누적: ${usedTitles.length + newTitles.length}개`);
+
+  return result;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
