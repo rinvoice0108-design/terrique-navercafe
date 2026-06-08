@@ -1,0 +1,27 @@
+name: 테리크 맘카페 주간 원고
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # 매주 월요일 오전 9시 KST (UTC 00:00)
+  workflow_dispatch:       # 수동 실행 버튼
+
+jobs:
+  generate-and-send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: 원고 생성 및 이메일 발송
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: node scripts/weekly.js

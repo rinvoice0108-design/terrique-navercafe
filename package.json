@@ -1,0 +1,15 @@
+{
+  "name": "naver-cafe-mailer",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node scripts/weekly.js",
+    "test-generate": "node scripts/generate.js",
+    "test-email": "node scripts/send-email.js --test"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "nodemailer": "^8.0.10"
+  }
+}
