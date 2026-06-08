@@ -45,7 +45,7 @@ function buildHtml(data) {
   <div style="max-width:640px;margin:0 auto;padding:32px 16px;">
     <div style="text-align:center;margin-bottom:32px;">
       <p style="font-size:12px;color:#A08878;letter-spacing:2px;margin:0 0 6px;">TERRIQUE · 맘카페 원고</p>
-      <h1 style="font-size:22px;color:#1A1A1A;margin:0 0 6px;">${data.week} 원고 9종</h1>
+      <h1 style="font-size:22px;color:#1A1A1A;margin:0 0 6px;">${data.week}</h1>
       <p style="font-size:13px;color:#888;margin:0;">9가지 유형 원고 · 글 내용 그대로 올리고 댓글은 별도 계정으로</p>
     </div>
     ${cards}
@@ -69,7 +69,7 @@ export async function sendEmail(data, isTest = false) {
   await transporter.sendMail({
     from: `"테리크 카페 원고봇" <${process.env.EMAIL_USER}>`,
     to,
-    subject: `${prefix}[테리크 맘카페] ${data.week} 원고 9종 도착`,
+    subject: `${prefix}[테리크 맘카페] ${data.week} 원고 도착`,
     html: buildHtml(data),
   });
 

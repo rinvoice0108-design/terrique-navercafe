@@ -19,10 +19,11 @@ function load(file) {
   return readFileSync(join(ROOT, 'knowledge', file), 'utf-8');
 }
 
-function getWeekLabel() {
-  const now = new Date();
-  const week = Math.ceil(now.getDate() / 7);
-  return `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${week}주차`;
+function getTodayLabel() {
+  return new Date().toLocaleDateString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric', month: 'long', day: 'numeric', weekday: 'short',
+  });
 }
 
 function loadUsedTitles() {
@@ -47,7 +48,7 @@ export async function generatePosts() {
   const brand      = load('brand.md');
   const types      = load('post-types.md');
   const examples   = load('examples.md');
-  const weekLabel  = getWeekLabel();
+  const weekLabel  = getTodayLabel();
   const usedTitles = loadUsedTitles();
 
   const usedSection = usedTitles.length > 0
