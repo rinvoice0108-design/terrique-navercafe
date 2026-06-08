@@ -23,7 +23,7 @@ function saveLog(data) {
 
 async function run() {
   const today = todayKST();
-  console.log(`[${today}] 테리크 맘카페 원고 생성 시작`);
+  console.log(`[${today}] 테리크 네이버카페 원고 생성 시작`);
 
   const holidays = await getHolidays();
   if (holidays.includes(today)) {

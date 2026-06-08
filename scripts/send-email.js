@@ -50,7 +50,7 @@ function buildHtml(data) {
     </div>
     ${cards}
     <div style="text-align:center;padding:20px 0;border-top:1px solid #e5e5e5;">
-      <p style="font-size:12px;color:#bbb;margin:0;">테리크 맘카페 원고 자동화 · by Gemini AI</p>
+      <p style="font-size:12px;color:#bbb;margin:0;">테리크 네이버카페 원고 자동화 · by Gemini AI</p>
     </div>
   </div>
 </body>
@@ -69,7 +69,7 @@ export async function sendEmail(data, isTest = false) {
   await transporter.sendMail({
     from: `"테리크 카페 원고봇" <${process.env.EMAIL_USER}>`,
     to,
-    subject: `${prefix}[테리크 맘카페] ${data.week} 원고 도착`,
+    subject: `${prefix}[테리크 네이버카페] ${data.week} 원고 도착`,
     html: buildHtml(data),
   });
 
