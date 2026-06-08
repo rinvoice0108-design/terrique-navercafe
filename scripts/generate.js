@@ -36,9 +36,7 @@ export async function generatePosts() {
   const types     = load('post-types.md');
   const examples  = load('examples.md');
   const weekLabel = getWeekLabel();
-  const selected  = pickRandom(ALL_TYPES, 4);
-
-  const typeBlocks = selected.map(t => `    {\n      "type": "${t}",\n      "title": "제목",\n      "content": "글 내용 (줄바꿈은 \\\\n 사용)",\n      "comment": "댓글 1줄"\n    }`).join(',\n');
+  const typeBlocks = ALL_TYPES.map(t => `    {\n      "type": "${t}",\n      "title": "제목",\n      "content": "글 내용 (줄바꿈은 \\\\n 사용)",\n      "comment": "댓글 1줄"\n    }`).join(',\n');
 
   const prompt = `당신은 테리크 브랜드의 맘카페 마케팅 원고 전문가입니다.
 실제 맘카페 회원처럼 자연스러운 글을 씁니다.
@@ -55,21 +53,17 @@ ${examples}
 ## 이번 주
 ${weekLabel}
 
-## 이번 주 선택된 유형 (이 4가지만 작성)
-${selected.join(', ')}
-
 ## 작성 지침
-- 위 4가지 유형 각 1개씩 총 4개 원고 세트를 작성하세요
+- 9가지 유형 각 1개씩 총 9개 원고 세트를 작성하세요
 - 각 세트는 제목 + 글 내용 + 댓글 1줄로 구성
 - 글 내용: 반드시 테리크 단어 사용 금지, 순수 일반인 글
-- 댓글: 테리크 자연스럽게 1회 언급, 특징 1~2개, 딱 1줄로 작성 (ㄴ 반응 없음)
+- 댓글: 테리크 자연스럽게 1회 언급, 특징 1~2개, 딱 1줄로 작성
 - 말투: 실제 맘카페 스타일 (ㅋㅋ, ㅠㅠ, ~요, 줄바꿈 자유롭게)
 - 각 유형마다 상황·소재가 겹치지 않게 다양하게
 - 반드시 아래 JSON 형식으로만 응답 (코드블록 없이 순수 JSON)
 
 {
   "week": "${weekLabel}",
-  "types": ${JSON.stringify(selected)},
   "posts": [
 ${typeBlocks}
   ]
